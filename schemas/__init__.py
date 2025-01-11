@@ -1,1 +1,1 @@
-from .places_schemas import State, Region
+from .places_schemas import Region, State, City

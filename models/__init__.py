@@ -1,1 +1,1 @@
-from .places_models import Region, State
+from .places_models import Region, State, City

@@ -14,3 +14,12 @@ class State(BaseModel):
 
     class Config:
         orm_mode = True
+
+class City(BaseModel):
+    id: int
+    name: str
+    state: str
+    region: str
+
+    class Config:
+        orm_mode = True
