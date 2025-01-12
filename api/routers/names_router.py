@@ -8,7 +8,7 @@ from typing import List, Optional
 
 names_router = APIRouter(prefix="/names")
 
-@names_router.get("/regions", response_model=List[models.PlaceName])
+@names_router.get("/regions", response_model=List[models.NameResponse])
 async def get_regions_names(
         db: Session = Depends(get_db)
     ):
@@ -22,7 +22,7 @@ async def get_regions_names(
 
     return regions
 
-@names_router.get("/states", response_model=List[models.PlaceName])
+@names_router.get("/states", response_model=List[models.NameResponse])
 async def get_states_names(
         region_id: Optional[int] = None, 
         db: Session = Depends(get_db)
@@ -47,7 +47,7 @@ async def get_states_names(
     
     return states
 
-@names_router.get("/cities", response_model=List[models.PlaceName])
+@names_router.get("/cities", response_model=List[models.NameResponse])
 async def get_cities_names(
         state_id: Optional[int] = None, 
         region_id: Optional[int] = None, 

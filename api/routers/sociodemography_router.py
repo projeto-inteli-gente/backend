@@ -8,50 +8,67 @@ from typing import List, Optional
 
 sociodemography_router = APIRouter(prefix="/sociodemography")
 
-@sociodemography_router.get("/region/{region_id}", response_model=models.Region)
-async def get_region_sociodemography(
+@sociodemography_router.get("/idh", response_model=List[models.IDHResponse])
+async def get_brazil_idh(
+        db: Session = Depends(get_db)
+    ):
+
+    brazil_idh = db.execute(
+        select(
+            schemas.BrazilIDH.year,
+            schemas.BrazilIDH.idh
+        )
+    ).fetchall()
+
+    return brazil_idh
+
+@sociodemography_router.get("/idh/region/{region_id}", response_model=List[models.IDHResponse])
+async def get_region_idh(
         region_id: int,
         db: Session = Depends(get_db)
     ):
 
-    region_sociodemography = db.execute(
+    region_idh = db.execute(
         select(
-            schemas.Region
+            schemas.RegionIDH.year,
+            schemas.RegionIDH.idh
         ).where(
-            schemas.Region.id == region_id
+            schemas.RegionIDH.region_id == region_id
         )
-    ).scalars().first()
+    ).fetchall()
 
-    return region_sociodemography
+    return region_idh
 
-@sociodemography_router.get("/state/{state_id}", response_model=models.State)
-async def get_state_sociodemography(
+@sociodemography_router.get("/idh/state/{state_id}", response_model=List[models.IDHResponse])
+async def get_state_idh(
         state_id: int,
         db: Session = Depends(get_db)
     ):
 
-    state_sociodemography = db.execute(
+    state_idb = db.execute(
         select(
-            schemas.State
+            schemas.StateIDH.year,
+            schemas.StateIDH.idh
         ).where(
-            schemas.State.id == state_id
+            schemas.StateIDH.state_id == state_id
         )
-    ).scalars().first()
+    ).fetchall()
 
-    return state_sociodemography
+    return state_idb
 
-@sociodemography_router.get("/city/{city_id}", response_model=models.City)
-async def get_city_sociodemography(
+@sociodemography_router.get("/idh/city/{city_id}", response_model=List[models.IDHResponse])
+async def get_city_idh(
         city_id: int,
         db: Session = Depends(get_db)
     ):
 
-    city_sociodemography = db.execute(
+    city_idh = db.execute(
         select(
-            schemas.City
+            schemas.CityIDH.year,
+            schemas.CityIDH.idh
         ).where(
-            schemas.City.id == city_id
+            schemas.CityIDH.city_id == city_id
         )
-    ).scalars().first()
+    ).fetchall()
 
-    return city_sociodemography
+    return city_idh

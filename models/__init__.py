@@ -1,2 +1,2 @@
-from .places_models import PlaceName
-from .places_models import Region, State, City
+from .names_models import NameResponse
+from .idh_models import IDHResponse
