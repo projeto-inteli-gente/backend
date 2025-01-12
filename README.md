@@ -4,6 +4,16 @@
 
 This project is part of the larger **Inteli.gente** initiative of the **Brazilian Ministry of Science and Tech (MCTI)** and of **IARA Data Science** research project, supported by the **São Paulo State Research foundation (FAPESP)**, and aims to **provide a backend for the interactive dashboard with the Inteli.gente plataform data**.
 
+## Routes
+
+* api/names/regions
+* api/names/states (takes parameter _region_id_)
+* api/names/cities (takes parameters _region_id_ and _state_id_)
+
+* api/sociodemography/region/<region_id>
+* api/sociodemography/state/<state_id>
+* api/sociodemography/city/<city_id>
+
 
 ## How to locally run the project
 
@@ -52,6 +62,16 @@ uvicorn app:app --reload
 ## Sobre o projeto
 
 Esse projeto é parte da iniciativa **Inteli.gente** do **Ministério de Ciência, Tecnologia e Inovação (MCTI)** e do **IARA Data Science**, com apoio da **FAPESP**, e visa **desenvolver o backend para o dashboard interativo com os dados da plataforma** Inteli.gente.
+
+## Rotas
+
+* api/names/regions
+* api/names/states (takes parameter _region_id_)
+* api/names/cities (takes parameters _region_id_ and _state_id_)
+
+* api/sociodemography/region/<region_id>
+* api/sociodemography/state/<state_id>
+* api/sociodemography/city/<city_id>
 
 ## Como executar o projeto localmente
 
