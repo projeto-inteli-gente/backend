@@ -219,3 +219,74 @@ async def get_city_pib(
     ).fetchall()
 
     return city_pib
+
+
+"""
+    Vinculo Formal Routers
+"""
+
+
+@sociodemography_router.get("/porcentagem_vinculo_formal", response_model=List[models.VinculoFormalResponse])
+async def get_brazil_vinculo_formal(
+        db: Session = Depends(get_db)
+    ):
+
+    brazil_vinculo_formal = db.execute(
+        select(
+            schemas.BrazilVinculoFormal.year,
+            schemas.BrazilVinculoFormal.porcentagem_vinculo_formal
+        )
+    ).fetchall()
+
+    return brazil_vinculo_formal
+
+@sociodemography_router.get("/porcentagem_vinculo_formal/region/{region_id}", response_model=List[models.VinculoFormalResponse])
+async def get_region_vinculo_formal(
+        region_id: int,
+        db: Session = Depends(get_db)
+    ):
+
+    region_vinculo_formal = db.execute(
+        select(
+            schemas.RegionVinculoFormal.year,
+            schemas.RegionVinculoFormal.porcentagem_vinculo_formal
+        ).where(
+            schemas.RegionVinculoFormal.region_id == region_id
+        )
+    ).fetchall()
+
+    return region_vinculo_formal
+
+@sociodemography_router.get("/porcentagem_vinculo_formal/state/{state_id}", response_model=List[models.VinculoFormalResponse])
+async def get_state_vinculo_formal(
+        state_id: int,
+        db: Session = Depends(get_db)
+    ):
+
+    state_vinculo_formal = db.execute(
+        select(
+            schemas.StateVinculoFormal.year,
+            schemas.StateVinculoFormal.porcentagem_vinculo_formal
+        ).where(
+            schemas.StateVinculoFormal.state_id == state_id
+        )
+    ).fetchall()
+
+    return state_vinculo_formal
+
+@sociodemography_router.get("/porcentagem_vinculo_formal/city/{city_id}", response_model=List[models.VinculoFormalResponse])
+async def get_city_vinculo_formal(
+        city_id: int,
+        db: Session = Depends(get_db)
+    ):
+
+    city_vinculo_formal = db.execute(
+        select(
+            schemas.CityVinculoFormal.year,
+            schemas.CityVinculoFormal.porcentagem_vinculo_formal
+        ).where(
+            schemas.CityVinculoFormal.city_id == city_id
+        )
+    ).fetchall()
+
+    return city_vinculo_formal
