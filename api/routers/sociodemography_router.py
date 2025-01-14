@@ -50,7 +50,7 @@ async def get_state_idh(
         db: Session = Depends(get_db)
     ):
 
-    state_idb = db.execute(
+    state_idh = db.execute(
         select(
             schemas.StateIDH.year,
             schemas.StateIDH.idh
@@ -59,7 +59,7 @@ async def get_state_idh(
         )
     ).fetchall()
 
-    return state_idb
+    return state_idh
 
 @sociodemography_router.get("/idh/city/{city_id}", response_model=List[models.IDHResponse])
 async def get_city_idh(
@@ -121,7 +121,7 @@ async def get_state_gini(
         db: Session = Depends(get_db)
     ):
 
-    state_idb = db.execute(
+    state_gini = db.execute(
         select(
             schemas.StateGini.year,
             schemas.StateGini.gini
@@ -130,7 +130,7 @@ async def get_state_gini(
         )
     ).fetchall()
 
-    return state_idb
+    return state_gini
 
 @sociodemography_router.get("/gini/city/{city_id}", response_model=List[models.GiniResponse])
 async def get_city_gini(
@@ -148,3 +148,74 @@ async def get_city_gini(
     ).fetchall()
 
     return city_gini
+
+
+"""
+    PIB per capita Routers
+"""
+
+
+@sociodemography_router.get("/pib_per_capita", response_model=List[models.PIBResponse])
+async def get_brazil_pib(
+        db: Session = Depends(get_db)
+    ):
+
+    brazil_pib = db.execute(
+        select(
+            schemas.BrazilPIB.year,
+            schemas.BrazilPIB.pib_per_capita
+        )
+    ).fetchall()
+
+    return brazil_pib
+
+@sociodemography_router.get("/pib_per_capita/region/{region_id}", response_model=List[models.PIBResponse])
+async def get_region_pib(
+        region_id: int,
+        db: Session = Depends(get_db)
+    ):
+
+    region_pib = db.execute(
+        select(
+            schemas.RegionPIB.year,
+            schemas.RegionPIB.pib_per_capita
+        ).where(
+            schemas.RegionPIB.region_id == region_id
+        )
+    ).fetchall()
+
+    return region_pib
+
+@sociodemography_router.get("/pib_per_capita/state/{state_id}", response_model=List[models.PIBResponse])
+async def get_state_pib(
+        state_id: int,
+        db: Session = Depends(get_db)
+    ):
+
+    state_pib = db.execute(
+        select(
+            schemas.StatePIB.year,
+            schemas.StatePIB.pib_per_capita
+        ).where(
+            schemas.StatePIB.state_id == state_id
+        )
+    ).fetchall()
+
+    return state_pib
+
+@sociodemography_router.get("/pib_per_capita/city/{city_id}", response_model=List[models.PIBResponse])
+async def get_city_pib(
+        city_id: int,
+        db: Session = Depends(get_db)
+    ):
+
+    city_pib = db.execute(
+        select(
+            schemas.CityPIB.year,
+            schemas.CityPIB.pib_per_capita
+        ).where(
+            schemas.CityPIB.city_id == city_id
+        )
+    ).fetchall()
+
+    return city_pib
