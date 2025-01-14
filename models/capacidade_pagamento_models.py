@@ -2,4 +2,4 @@ from pydantic import BaseModel
 
 class CapagResponse(BaseModel):
     year: int
-    capag: float
+    capacidade_pagamento: float

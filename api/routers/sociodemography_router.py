@@ -290,3 +290,73 @@ async def get_city_vinculo_formal(
     ).fetchall()
 
     return city_vinculo_formal
+
+"""
+    Capacidade de Pagamento Routers
+"""
+
+
+@sociodemography_router.get("/capacidade_pagamento", response_model=List[models.CapagResponse])
+async def get_brazil_capacidade_pagamento(
+        db: Session = Depends(get_db)
+    ):
+
+    brazil_capacidade_pagamento = db.execute(
+        select(
+            schemas.BrazilCapag.year,
+            schemas.BrazilCapag.capacidade_pagamento
+        )
+    ).fetchall()
+
+    return brazil_capacidade_pagamento
+
+@sociodemography_router.get("/capacidade_pagamento/region/{region_id}", response_model=List[models.CapagResponse])
+async def get_region_capacidade_pagamento(
+        region_id: int,
+        db: Session = Depends(get_db)
+    ):
+
+    region_capacidade_pagamento = db.execute(
+        select(
+            schemas.RegionCapag.year,
+            schemas.RegionCapag.capacidade_pagamento
+        ).where(
+            schemas.RegionCapag.region_id == region_id
+        )
+    ).fetchall()
+
+    return region_capacidade_pagamento
+
+@sociodemography_router.get("/capacidade_pagamento/state/{state_id}", response_model=List[models.CapagResponse])
+async def get_state_capacidade_pagamento(
+        state_id: int,
+        db: Session = Depends(get_db)
+    ):
+
+    state_capacidade_pagamento = db.execute(
+        select(
+            schemas.StateCapag.year,
+            schemas.StateCapag.capacidade_pagamento
+        ).where(
+            schemas.StateCapag.state_id == state_id
+        )
+    ).fetchall()
+
+    return state_capacidade_pagamento
+
+@sociodemography_router.get("/capacidade_pagamento/city/{city_id}", response_model=List[models.CapagResponse])
+async def get_city_capacidade_pagamento(
+        city_id: int,
+        db: Session = Depends(get_db)
+    ):
+
+    city_capacidade_pagamento = db.execute(
+        select(
+            schemas.CityCapag.year,
+            schemas.CityCapag.capacidade_pagamento
+        ).where(
+            schemas.CityCapag.city_id == city_id
+        )
+    ).fetchall()
+
+    return city_capacidade_pagamento
