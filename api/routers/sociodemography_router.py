@@ -8,6 +8,11 @@ from typing import List, Optional
 
 sociodemography_router = APIRouter(prefix="/sociodemography")
 
+
+"""
+    IDH Routers
+"""
+
 @sociodemography_router.get("/idh", response_model=List[models.IDHResponse])
 async def get_brazil_idh(
         db: Session = Depends(get_db)
@@ -72,3 +77,74 @@ async def get_city_idh(
     ).fetchall()
 
     return city_idh
+
+
+"""
+    Coeficiente de Gini Routers
+"""
+
+
+@sociodemography_router.get("/gini", response_model=List[models.GiniResponse])
+async def get_brazil_gini(
+        db: Session = Depends(get_db)
+    ):
+
+    brazil_gini = db.execute(
+        select(
+            schemas.BrazilGini.year,
+            schemas.BrazilGini.gini
+        )
+    ).fetchall()
+
+    return brazil_gini
+
+@sociodemography_router.get("/gini/region/{region_id}", response_model=List[models.GiniResponse])
+async def get_region_gini(
+        region_id: int,
+        db: Session = Depends(get_db)
+    ):
+
+    region_gini = db.execute(
+        select(
+            schemas.RegionGini.year,
+            schemas.RegionGini.gini
+        ).where(
+            schemas.RegionGini.region_id == region_id
+        )
+    ).fetchall()
+
+    return region_gini
+
+@sociodemography_router.get("/gini/state/{state_id}", response_model=List[models.GiniResponse])
+async def get_state_gini(
+        state_id: int,
+        db: Session = Depends(get_db)
+    ):
+
+    state_idb = db.execute(
+        select(
+            schemas.StateGini.year,
+            schemas.StateGini.gini
+        ).where(
+            schemas.StateGini.state_id == state_id
+        )
+    ).fetchall()
+
+    return state_idb
+
+@sociodemography_router.get("/gini/city/{city_id}", response_model=List[models.GiniResponse])
+async def get_city_gini(
+        city_id: int,
+        db: Session = Depends(get_db)
+    ):
+
+    city_gini = db.execute(
+        select(
+            schemas.CityGini.year,
+            schemas.CityGini.gini
+        ).where(
+            schemas.CityGini.city_id == city_id
+        )
+    ).fetchall()
+
+    return city_gini
