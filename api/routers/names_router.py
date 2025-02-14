@@ -5,79 +5,47 @@ from db.db import get_db
 import models
 import schemas
 from typing import List, Optional
+from intelligentedb.indicators import read_data as dbrd
+import pandas as pd
 
 names_router = APIRouter(prefix="/names")
 
-@names_router.get("/regions", response_model=List[models.NameResponse])
-async def get_regions_names(
-        db: Session = Depends(get_db)
-    ):
+@names_router.get("/regions",response_model=List[models.RegionResponse])
+async def get_regions_names():
+    response = dbrd.get_city_dimension_values()
+    regions = response[['nome_regiao_nacional']].drop_duplicates().reset_index(drop=True)
 
-    regions = db.execute(
-        select(
-            schemas.Region.id, 
-            schemas.Region.name
-        )
-    ).fetchall()
+    return [models.RegionResponse(name=region_name) for region_name in regions['nome_regiao_nacional']]
 
-    return regions
-
-@names_router.get("/states", response_model=List[models.NameResponse])
+@names_router.get("/states",response_model=List[models.StateResponse])
 async def get_states_names(
-        region_id: Optional[int] = None, 
-        db: Session = Depends(get_db)
+        nome_regiao: Optional[str] = None
     ):
     
-    if region_id:
-        states = db.execute(
-            select(
-                schemas.State.id, 
-                schemas.State.name
-            ).where(
-                schemas.State.region_id == region_id
-            )
-        ).fetchall()
-    else:
-        states = db.execute(
-            select(
-                schemas.State.id, 
-                schemas.State.name
-            )
-        ).fetchall()
-    
-    return states
+    response = dbrd.get_city_dimension_values()
 
-@names_router.get("/cities", response_model=List[models.NameResponse])
+    if nome_regiao:
+        states = response.loc[response['nome_regiao_nacional'] == nome_regiao][['nome_uf','sigla_uf']].drop_duplicates().reset_index(drop=True)
+    else:
+        states = response[['nome_uf','sigla_uf']].drop_duplicates().reset_index(drop=True)
+
+    return [models.StateResponse(nome_uf=item['nome_uf'],sigla_uf=item['sigla_uf']) for item in states.to_dict(orient='records')]
+
+@names_router.get("/cities")
 async def get_cities_names(
-        state_id: Optional[int] = None, 
-        region_id: Optional[int] = None, 
-        db: Session = Depends(get_db)
+        sigla_uf: Optional[str] = None, 
+        nome_regiao: Optional[str] = None, 
     ):
 
-    if state_id:
-        cities = db.execute(
-            select(
-                schemas.City.id, 
-                schemas.City.name
-            ).where(
-                schemas.City.state_id == state_id
-            )
-        ).fetchall()
-    elif region_id:
-        cities = db.execute(
-            select(
-                schemas.City.id, 
-                schemas.City.name)
-            .where(
-                schemas.City.region_id == region_id
-            )
-        ).fetchall()
-    else:
-        cities = db.execute(
-            select(
-                schemas.City.id, 
-                schemas.City.name
-            )
-        ).fetchall()
+    response = dbrd.get_city_dimension_values()
 
-    return cities
+    if sigla_uf:
+        cities = response.loc[response['sigla_uf'] == sigla_uf]\
+            [['nome_municipio','municipio_id']].reset_index()
+    elif nome_regiao:
+        cities = response.loc[response['nome_regiao_nacional'] == nome_regiao]\
+            [['nome_municipio','municipio_id']].reset_index(drop=True)
+    else:
+        cities = response[['nome_municipio','municipio_id']].reset_index(drop=True)
+
+    return [models.CityResponse(nome_municipio=item['nome_municipio'],municipio_id=item['municipio_id']) for item in cities.to_dict(orient='records')]
