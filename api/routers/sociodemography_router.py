@@ -2,9 +2,11 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.future import select
 from sqlalchemy.orm import Session
 from db.db import get_db
+import db.utils as dbutils
 import models
-import schemas
 from typing import List, Optional
+from intelligentedb.indicators import read_data  as dbrd
+import pandas as pd
 
 sociodemography_router = APIRouter(prefix="/sociodemography")
 
@@ -13,70 +15,40 @@ sociodemography_router = APIRouter(prefix="/sociodemography")
     IDH Routers
 """
 
-@sociodemography_router.get("/idh", response_model=List[models.IDHResponse])
-async def get_brazil_idh(
-        db: Session = Depends(get_db)
-    ):
+@sociodemography_router.get("/idh", response_model=List[models.IndicatorResponse])
+async def get_brazil_idh():
 
-    brazil_idh = db.execute(
-        select(
-            schemas.BrazilIDH.year,
-            schemas.BrazilIDH.idh
-        )
-    ).fetchall()
+    df = dbutils.get_brazil_mean_indicator('índice de desenvolvimento humano do município (idh-m)')
 
-    return brazil_idh
+    return [models.IndicatorResponse(year=ano,value=valor) for ano,valor in df.itertuples()]
 
-@sociodemography_router.get("/idh/region/{region_id}", response_model=List[models.IDHResponse])
+
+
+@sociodemography_router.get("/idh/region/{nome_regiao}", response_model=List[models.IndicatorResponse])
 async def get_region_idh(
-        region_id: int,
-        db: Session = Depends(get_db)
+        nome_regiao: str,
     ):
 
-    region_idh = db.execute(
-        select(
-            schemas.RegionIDH.year,
-            schemas.RegionIDH.idh
-        ).where(
-            schemas.RegionIDH.region_id == region_id
-        )
-    ).fetchall()
+    df = dbutils.get_region_mean_indicator('índice de desenvolvimento humano do município (idh-m)',nome_regiao)
 
-    return region_idh
+    return [models.IndicatorResponse(year=ano,value=valor) for ano,valor in df.itertuples()]
 
-@sociodemography_router.get("/idh/state/{state_id}", response_model=List[models.IDHResponse])
+@sociodemography_router.get("/idh/state/{sigla_uf}", response_model=List[models.IndicatorResponse])
 async def get_state_idh(
-        state_id: int,
-        db: Session = Depends(get_db)
+        sigla_uf: str
     ):
 
-    state_idh = db.execute(
-        select(
-            schemas.StateIDH.year,
-            schemas.StateIDH.idh
-        ).where(
-            schemas.StateIDH.state_id == state_id
-        )
-    ).fetchall()
+    df = dbutils.get_state_mean_indicator('índice de desenvolvimento humano do município (idh-m)',sigla_uf)
 
-    return state_idh
+    return [models.IndicatorResponse(year=ano,value=valor) for ano,valor in df.itertuples()]
 
-@sociodemography_router.get("/idh/city/{city_id}", response_model=List[models.IDHResponse])
+@sociodemography_router.get("/idh/city/{id_municipio}", response_model=List[models.IndicatorResponse])
 async def get_city_idh(
-        city_id: int,
-        db: Session = Depends(get_db)
+        id_municipio: int,
     ):
 
-    city_idh = db.execute(
-        select(
-            schemas.CityIDH.year,
-            schemas.CityIDH.idh
-        ).where(
-            schemas.CityIDH.city_id == city_id
-        )
-    ).fetchall()
-
-    return city_idh
+    df = dbutils.get_city_indicator('índice de desenvolvimento humano do município (idh-m)',id_municipio)
+    return [models.IndicatorResponse(year=item['ano'],value=item['valor']) for item in df.to_dict(orient='records')]
 
 
 """
@@ -84,141 +56,80 @@ async def get_city_idh(
 """
 
 
-@sociodemography_router.get("/gini", response_model=List[models.GiniResponse])
-async def get_brazil_gini(
-        db: Session = Depends(get_db)
-    ):
+@sociodemography_router.get("/gini", response_model=List[models.IndicatorResponse])
+async def get_brazil_gini():
 
-    brazil_gini = db.execute(
-        select(
-            schemas.BrazilGini.year,
-            schemas.BrazilGini.gini
-        )
-    ).fetchall()
+    df = dbutils.get_brazil_mean_indicator('índice de gini da renda domiciliar per capita')
 
-    return brazil_gini
+    return [models.IndicatorResponse(year=ano,value=valor) for ano,valor in df.itertuples()]
 
-@sociodemography_router.get("/gini/region/{region_id}", response_model=List[models.GiniResponse])
+
+@sociodemography_router.get("/gini/region/{nome_regiao}", response_model=List[models.IndicatorResponse])
 async def get_region_gini(
-        region_id: int,
-        db: Session = Depends(get_db)
+        nome_regiao: str
     ):
 
-    region_gini = db.execute(
-        select(
-            schemas.RegionGini.year,
-            schemas.RegionGini.gini
-        ).where(
-            schemas.RegionGini.region_id == region_id
-        )
-    ).fetchall()
+    df = dbutils.get_region_mean_indicator('índice de gini da renda domiciliar per capita',nome_regiao)
 
-    return region_gini
+    return [models.IndicatorResponse(year=ano,value=valor) for ano,valor in df.itertuples()]
 
-@sociodemography_router.get("/gini/state/{state_id}", response_model=List[models.GiniResponse])
+
+@sociodemography_router.get("/gini/state/{sigla_uf}", response_model=List[models.IndicatorResponse])
 async def get_state_gini(
-        state_id: int,
-        db: Session = Depends(get_db)
+        sigla_uf: str,
     ):
 
-    state_gini = db.execute(
-        select(
-            schemas.StateGini.year,
-            schemas.StateGini.gini
-        ).where(
-            schemas.StateGini.state_id == state_id
-        )
-    ).fetchall()
+    df = dbutils.get_state_mean_indicator('índice de gini da renda domiciliar per capita',sigla_uf)
 
-    return state_gini
+    return [models.IndicatorResponse(year=ano,value=valor) for ano,valor in df.itertuples()]
 
-@sociodemography_router.get("/gini/city/{city_id}", response_model=List[models.GiniResponse])
+
+
+@sociodemography_router.get("/gini/city/{municipio_id}", response_model=List[models.IndicatorResponse])
 async def get_city_gini(
-        city_id: int,
-        db: Session = Depends(get_db)
+        municipio_id: int
     ):
 
-    city_gini = db.execute(
-        select(
-            schemas.CityGini.year,
-            schemas.CityGini.gini
-        ).where(
-            schemas.CityGini.city_id == city_id
-        )
-    ).fetchall()
-
-    return city_gini
-
+    df = dbutils.get_city_indicator('índice de gini da renda domiciliar per capita',municipio_id)
+    return [models.IndicatorResponse(year=item['ano'],value=item['valor']) for item in df.to_dict(orient='records')]
 
 """
     PIB per capita Routers
 """
 
 
-@sociodemography_router.get("/pib_per_capita", response_model=List[models.PIBResponse])
-async def get_brazil_pib(
-        db: Session = Depends(get_db)
-    ):
+@sociodemography_router.get("/pib_per_capita", response_model=List[models.IndicatorResponse])
+async def get_brazil_pib():
 
-    brazil_pib = db.execute(
-        select(
-            schemas.BrazilPIB.year,
-            schemas.BrazilPIB.pib_per_capita
-        )
-    ).fetchall()
+    df = dbutils.get_brazil_mean_indicator('pib per capita')
 
-    return brazil_pib
+    return [models.IndicatorResponse(year=ano,value=valor) for ano,valor in df.itertuples()]
 
-@sociodemography_router.get("/pib_per_capita/region/{region_id}", response_model=List[models.PIBResponse])
+@sociodemography_router.get("/pib_per_capita/region/{nome_regiao}", response_model=List[models.IndicatorResponse])
 async def get_region_pib(
-        region_id: int,
-        db: Session = Depends(get_db)
+        nome_regiao: str,
     ):
 
-    region_pib = db.execute(
-        select(
-            schemas.RegionPIB.year,
-            schemas.RegionPIB.pib_per_capita
-        ).where(
-            schemas.RegionPIB.region_id == region_id
-        )
-    ).fetchall()
+    df = dbutils.get_region_mean_indicator('pib per capita',nome_regiao)
 
-    return region_pib
+    return [models.IndicatorResponse(year=ano,value=valor) for ano,valor in df.itertuples()]
 
-@sociodemography_router.get("/pib_per_capita/state/{state_id}", response_model=List[models.PIBResponse])
+@sociodemography_router.get("/pib_per_capita/state/{sigla_uf}", response_model=List[models.IndicatorResponse])
 async def get_state_pib(
-        state_id: int,
-        db: Session = Depends(get_db)
+        sigla_uf: str,
     ):
 
-    state_pib = db.execute(
-        select(
-            schemas.StatePIB.year,
-            schemas.StatePIB.pib_per_capita
-        ).where(
-            schemas.StatePIB.state_id == state_id
-        )
-    ).fetchall()
+    df = dbutils.get_state_mean_indicator('pib per capita',sigla_uf)
 
-    return state_pib
+    return [models.IndicatorResponse(year=ano,value=valor) for ano,valor in df.itertuples()]
 
-@sociodemography_router.get("/pib_per_capita/city/{city_id}", response_model=List[models.PIBResponse])
+@sociodemography_router.get("/pib_per_capita/city/{municipio_id}", response_model=List[models.IndicatorResponse])
 async def get_city_pib(
-        city_id: int,
-        db: Session = Depends(get_db)
+        municipio_id: int,
     ):
 
-    city_pib = db.execute(
-        select(
-            schemas.CityPIB.year,
-            schemas.CityPIB.pib_per_capita
-        ).where(
-            schemas.CityPIB.city_id == city_id
-        )
-    ).fetchall()
-
-    return city_pib
+    df = dbutils.get_city_indicator('pib per capita',municipio_id)
+    return [models.IndicatorResponse(year=item['ano'],value=item['valor']) for item in df.to_dict(orient='records')]
 
 
 """
@@ -226,137 +137,73 @@ async def get_city_pib(
 """
 
 
-@sociodemography_router.get("/porcentagem_vinculo_formal", response_model=List[models.VinculoFormalResponse])
+@sociodemography_router.get("/porcentagem_vinculo_formal", response_model=List[models.IndicatorResponse])
 async def get_brazil_vinculo_formal(
         db: Session = Depends(get_db)
     ):
 
-    brazil_vinculo_formal = db.execute(
-        select(
-            schemas.BrazilVinculoFormal.year,
-            schemas.BrazilVinculoFormal.porcentagem_vinculo_formal
-        )
-    ).fetchall()
+    df = dbutils.get_brazil_mean_indicator('população ocupada com vínculo formal')
+    return [models.IndicatorResponse(year=ano,value=valor) for ano,valor in df.itertuples()]
 
-    return brazil_vinculo_formal
-
-@sociodemography_router.get("/porcentagem_vinculo_formal/region/{region_id}", response_model=List[models.VinculoFormalResponse])
+@sociodemography_router.get("/porcentagem_vinculo_formal/region/{nome_regiao}", response_model=List[models.IndicatorResponse])
 async def get_region_vinculo_formal(
-        region_id: int,
-        db: Session = Depends(get_db)
+        nome_regiao: str,
     ):
 
-    region_vinculo_formal = db.execute(
-        select(
-            schemas.RegionVinculoFormal.year,
-            schemas.RegionVinculoFormal.porcentagem_vinculo_formal
-        ).where(
-            schemas.RegionVinculoFormal.region_id == region_id
-        )
-    ).fetchall()
+    df = dbutils.get_region_mean_indicator('população ocupada com vínculo formal',nome_regiao)
 
-    return region_vinculo_formal
+    return [models.IndicatorResponse(year=ano,value=valor) for ano,valor in df.itertuples()]
 
-@sociodemography_router.get("/porcentagem_vinculo_formal/state/{state_id}", response_model=List[models.VinculoFormalResponse])
+@sociodemography_router.get("/porcentagem_vinculo_formal/state/{sigla_uf}", response_model=List[models.IndicatorResponse])
 async def get_state_vinculo_formal(
-        state_id: int,
-        db: Session = Depends(get_db)
+        sigla_uf: str,
     ):
 
-    state_vinculo_formal = db.execute(
-        select(
-            schemas.StateVinculoFormal.year,
-            schemas.StateVinculoFormal.porcentagem_vinculo_formal
-        ).where(
-            schemas.StateVinculoFormal.state_id == state_id
-        )
-    ).fetchall()
+    df = dbutils.get_state_mean_indicator('população ocupada com vínculo formal',sigla_uf)
 
-    return state_vinculo_formal
+    return [models.IndicatorResponse(year=ano,value=valor) for ano,valor in df.itertuples()]
 
-@sociodemography_router.get("/porcentagem_vinculo_formal/city/{city_id}", response_model=List[models.VinculoFormalResponse])
+@sociodemography_router.get("/porcentagem_vinculo_formal/city/{municipio_id}", response_model=List[models.IndicatorResponse])
 async def get_city_vinculo_formal(
-        city_id: int,
-        db: Session = Depends(get_db)
+        municipio_id: int,
     ):
 
-    city_vinculo_formal = db.execute(
-        select(
-            schemas.CityVinculoFormal.year,
-            schemas.CityVinculoFormal.porcentagem_vinculo_formal
-        ).where(
-            schemas.CityVinculoFormal.city_id == city_id
-        )
-    ).fetchall()
-
-    return city_vinculo_formal
+    df = dbutils.get_city_indicator('população ocupada com vínculo formal',municipio_id)
+    return [models.IndicatorResponse(year=item['ano'],value=item['valor']) for item in df.to_dict(orient='records')]
 
 """
     Capacidade de Pagamento Routers
 """
 
 
-@sociodemography_router.get("/capacidade_pagamento", response_model=List[models.CapagResponse])
-async def get_brazil_capacidade_pagamento(
-        db: Session = Depends(get_db)
-    ):
+@sociodemography_router.get("/capacidade_pagamento", response_model=List[models.IndicatorResponse])
+async def get_brazil_capacidade_pagamento():
 
-    brazil_capacidade_pagamento = db.execute(
-        select(
-            schemas.BrazilCapag.year,
-            schemas.BrazilCapag.capacidade_pagamento
-        )
-    ).fetchall()
+    
+    df = dbutils.get_brazil_mean_indicator('capacidade de pagamento dos municípios (capag)')
+    return [models.IndicatorResponse(year=ano,value=valor) for ano,valor in df.itertuples()]
 
-    return brazil_capacidade_pagamento
-
-@sociodemography_router.get("/capacidade_pagamento/region/{region_id}", response_model=List[models.CapagResponse])
+@sociodemography_router.get("/capacidade_pagamento/region/{nome_regiao}", response_model=List[models.IndicatorResponse])
 async def get_region_capacidade_pagamento(
-        region_id: int,
-        db: Session = Depends(get_db)
+        nome_regiao: str,
     ):
 
-    region_capacidade_pagamento = db.execute(
-        select(
-            schemas.RegionCapag.year,
-            schemas.RegionCapag.capacidade_pagamento
-        ).where(
-            schemas.RegionCapag.region_id == region_id
-        )
-    ).fetchall()
+    df = dbutils.get_region_mean_indicator('capacidade de pagamento dos municípios (capag)',nome_regiao)
+    return [models.IndicatorResponse(year=ano,value=valor) for ano,valor in df.itertuples()]
 
-    return region_capacidade_pagamento
-
-@sociodemography_router.get("/capacidade_pagamento/state/{state_id}", response_model=List[models.CapagResponse])
+@sociodemography_router.get("/capacidade_pagamento/state/{sigla_uf}", response_model=List[models.IndicatorResponse])
 async def get_state_capacidade_pagamento(
-        state_id: int,
-        db: Session = Depends(get_db)
+        sigla_uf: str
     ):
 
-    state_capacidade_pagamento = db.execute(
-        select(
-            schemas.StateCapag.year,
-            schemas.StateCapag.capacidade_pagamento
-        ).where(
-            schemas.StateCapag.state_id == state_id
-        )
-    ).fetchall()
+    df = dbutils.get_state_mean_indicator('capacidade de pagamento dos municípios (capag)',sigla_uf)
 
-    return state_capacidade_pagamento
+    return [models.IndicatorResponse(year=ano,value=valor) for ano,valor in df.itertuples()]
 
-@sociodemography_router.get("/capacidade_pagamento/city/{city_id}", response_model=List[models.CapagResponse])
+@sociodemography_router.get("/capacidade_pagamento/city/{municipio_id}", response_model=List[models.IndicatorResponse])
 async def get_city_capacidade_pagamento(
-        city_id: int,
-        db: Session = Depends(get_db)
+        municipio_id: int,
     ):
 
-    city_capacidade_pagamento = db.execute(
-        select(
-            schemas.CityCapag.year,
-            schemas.CityCapag.capacidade_pagamento
-        ).where(
-            schemas.CityCapag.city_id == city_id
-        )
-    ).fetchall()
-
-    return city_capacidade_pagamento
+    df = dbutils.get_city_indicator('capacidade de pagamento dos municípios (capag)',municipio_id)
+    return [models.IndicatorResponse(year=item['ano'],value=item['valor']) for item in df.to_dict(orient='records')]
