@@ -1,4 +1,5 @@
 venv
+db_connection.env
 .env
 db/tables.sql
 *__pycache__*

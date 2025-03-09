@@ -37,6 +37,8 @@ git clone https://github.com/projeto-inteli-gente/backend.git
 cd backend
 ```
 
+### Using a virtual environment
+
 3) Create a virtual environment:
 ```bash
 python3 -m venv venv
@@ -55,6 +57,18 @@ pip install -r requirements.txt
 6) Run the project:
 ```bash
 uvicorn app:app --reload
+```
+
+### Using docker
+
+3) Build a docker image with the project:
+```bash
+docker build -t backend .
+```
+
+4) Execute the docker image in a container:
+```bash
+sudo docker run -p 8502:8502 backend
 ```
 
 :brazil:
@@ -96,6 +110,8 @@ git clone https://github.com/projeto-inteli-gente/backend.git
 cd backend
 ```
 
+### Usando um ambiente virtual
+
 3) Crie um ambiente virtual:
 ```bash
 python3 -m venv venv
@@ -114,4 +130,16 @@ pip install -r requirements.txt
 6) Execute o projeto:
 ```bash
 uvicorn app:app --reload
+```
+
+### Usando docker
+
+3) Construa uma imagem docker com o projeto:
+```bash
+docker build -t backend .
+```
+
+4) Execute a imagem em um container:
+```bash
+sudo docker run -p 8502:8502 backend
 ```
