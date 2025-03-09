@@ -11,4 +11,4 @@ COPY . .
 
 EXPOSE 8502
 
-CMD ["uvicorn", "app:app", "--port=8502", "--host=0.0.0.0"]
+CMD ["uvicorn", "app:app", "--port=8000", "--host=0.0.0.0"]
